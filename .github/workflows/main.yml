@@ -1,14 +1,21 @@
 name: Main Workflow TechMarket
 on:
   push:
-    branches: [main, develop] # Estrategia multi-entorno
+    branches: [main, develop]
 jobs:
-  call-ci:
+  call-build:
     uses: ./.github/workflows/build-template.yml
     with:
       node-version: '20'
-  call-cd:
-    needs: call-ci
-    if: github.ref == 'refs/heads/main' # Solo despliega si es la rama main
+      
+  call-test:
+    needs: call-build # Espera a que termine el build
+    uses: ./.github/workflows/test-template.yml
+    with:
+      node-version: '20'
+
+  call-deploy:
+    needs: call-test # Espera a que las pruebas pasen con éxito
+    if: github.ref == 'refs/heads/main'
     uses: ./.github/workflows/deploy-template.yml
-    secrets: inherit # Pasa los secretos automáticamente
+    secrets: inherit
