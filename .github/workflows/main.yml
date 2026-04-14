@@ -1,8 +1,14 @@
-# v1.0.0 - Pipeline Orquestador Principal
+# ==============================================================================
+# MÓDULO: Orquestador Principal (TechMarket)
+# VERSIÓN: 1.0.1
+# DESCRIPCIÓN: Pipeline central que define la estrategia multi-entorno.
+#              Coordina la ejecución secuencial de las plantillas de 
+#              Construcción, Pruebas y Despliegue.
+# ==============================================================================
 name: Main Workflow TechMarket
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop] # Define la estrategia multi-entorno
 jobs:
   call-build:
     uses: ./.github/workflows/build-template.yml
@@ -10,13 +16,13 @@ jobs:
       node-version: '20'
       
   call-test:
-    needs: call-build # Espera a que termine el build
+    needs: call-build # Garantiza el orden: Espera a que termine el build
     uses: ./.github/workflows/test-template.yml
     with:
       node-version: '20'
 
   call-deploy:
-    needs: call-test # Espera a que las pruebas pasen con éxito
-    if: github.ref == 'refs/heads/main'
+    needs: call-test # Garantiza que las pruebas pasen con éxito antes de desplegar
+    if: github.ref == 'refs/heads/main' # Condicional: Solo despliega en producción
     uses: ./.github/workflows/deploy-template.yml
-    secrets: inherit
+    secrets: inherit # Propagación segura de secretos AWS

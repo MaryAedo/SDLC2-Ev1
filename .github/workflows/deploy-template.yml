@@ -1,16 +1,25 @@
-# v1.0.0 - Plantilla modular de Despliegue en AWS ECR
+# ==============================================================================
+# PLANTILLA: Despliegue AWS ECR (CD Deploy)
+# VERSIÓN: 1.0.1
+# DESCRIPCIÓN: Módulo de contenerización y registro seguro. Autentica con AWS
+#              y almacena la imagen inmutable etiquetada con el SHA del commit.
+# SECRETOS REQUERIDOS: 
+#   - AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN
+# ==============================================================================
 name: CD Deploy Template
 on:
   workflow_call:
     secrets:
       AWS_ACCESS_KEY_ID: {required: true}
       AWS_SECRET_ACCESS_KEY: {required: true}
-      AWS_SESSION_TOKEN: {required: true} # Obligatorio para Academy
+      AWS_SESSION_TOKEN: {required: true} # Obligatorio para AWS Academy
 jobs:
   build-docker-and-push:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      
+      # aws-actions/configure-aws-credentials@v4: Autenticación segura a la nube
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -18,9 +27,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: us-east-1
+          
+      # amazon-ecr-login@v2: Genera acceso temporal para el push
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
+        
+      # Trazabilidad perfecta: El tag de la imagen usa el SHA del commit (github.sha)
       - name: Build and Push Image
         run: |
           docker build -t techmarket-app:${{ github.sha }} .
