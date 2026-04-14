@@ -1,3 +1,4 @@
+# v1.0.0 - Plantilla modular de Pruebas y Auditoría
 name: CI Test Template
 on:
   workflow_call:

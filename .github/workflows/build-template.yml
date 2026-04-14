@@ -1,3 +1,4 @@
+# v2.0.0 - Plantilla modular de Construcción para TechMarket
 name: CI Build Template
 on:
   workflow_call:
