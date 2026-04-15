@@ -8,7 +8,9 @@
 name: Main Workflow TechMarket
 on:
   push:
-    branches: [main, develop] # Define la estrategia multi-entorno
+  # Define la estrategia multi-entorno
+    branches: [main, master, develop] # Agregamos master por si acaso
+  workflow_dispatch: # ¡NUEVO! Esto crea el botón manual en GitHub
 jobs:
   call-build:
     uses: ./.github/workflows/build-template.yml
