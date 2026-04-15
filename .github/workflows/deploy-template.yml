@@ -1,16 +1,37 @@
-# v1.0.0 - Plantilla modular de Despliegue en AWS ECR
+# ==============================================================================
+# PLANTILLA: Despliegue AWS ECR (CD Deploy)
+# VERSIÓN: 1.1.1 (MINOR: Se integran env vars y build-args para Docker)
+# DESCRIPCIÓN: Módulo de contenerización y registro seguro. Autentica con AWS
+#              y almacena la imagen inmutable etiquetada con el SHA del commit.
+# SECRETOS REQUERIDOS: 
+#   - AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN
+# ==============================================================================
 name: CD Deploy Template
 on:
   workflow_call:
+    inputs:
+      app-color:
+        required: false
+        type: string
+        default: 'Blue'
     secrets:
       AWS_ACCESS_KEY_ID: {required: true}
       AWS_SECRET_ACCESS_KEY: {required: true}
-      AWS_SESSION_TOKEN: {required: true} # Obligatorio para Academy
+      AWS_SESSION_TOKEN: {required: true} # Obligatorio para AWS Academy
+
+# Declaración de variables de entorno (env:) comunes
+env:
+  ECR_REPOSITORY: techmarket-repo
+  IMAGE_TAG: ${{ github.sha }}
+  APP_COLOR: ${{ inputs.app-color }}
+
 jobs:
   build-docker-and-push:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      
+      # aws-actions/configure-aws-credentials@v4: Autenticación segura a la nube
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -18,11 +39,15 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: us-east-1
+          
+      # amazon-ecr-login@v2: Genera acceso temporal para el push
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
+        
+      # Trazabilidad perfecta: El tag usa el SHA del commit y se inyecta el ARG de Docker
       - name: Build and Push Image
         run: |
-          docker build -t techmarket-app:${{ github.sha }} .
-          docker tag techmarket-app:${{ github.sha }} ${{ steps.login-ecr.outputs.registry }}/techmarket-repo:${{ github.sha }}
-          docker push ${{ steps.login-ecr.outputs.registry }}/techmarket-repo:${{ github.sha }}
+          docker build --build-arg BUILD_COLOR=${{ env.APP_COLOR }} -t techmarket-app:${{ env.IMAGE_TAG }} .
+          docker tag techmarket-app:${{ env.IMAGE_TAG }} ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+          docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}

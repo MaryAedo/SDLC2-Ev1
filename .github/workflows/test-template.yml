@@ -1,4 +1,12 @@
-# v1.0.0 - Plantilla modular de Pruebas y Auditoría
+# ==============================================================================
+# PLANTILLA: Pruebas y Compliance (CI Test)
+# VERSIÓN: 1.1.1 (MINOR: Parametrización de variable de entorno APP_COLOR)
+# DESCRIPCIÓN: Módulo de Quality Gate. Ejecuta auditorías de seguridad y 
+#              pruebas unitarias para mitigar riesgos antes del despliegue.
+# PARÁMETROS: 
+#   - node-version (string): Versión de Node.js a utilizar.
+#   - app-color (string): Variable inyectada para las pruebas unitarias.
+# ==============================================================================
 name: CI Test Template
 on:
   workflow_call:
@@ -6,9 +14,16 @@ on:
       node-version:
         required: true
         type: string
+      app-color:
+        required: false
+        type: string
+        default: 'Test-Env'
 jobs:
   test:
     runs-on: ubuntu-latest
+    # Declaración de variables de entorno comunes parametrizables
+    env:
+      APP_COLOR: ${{ inputs.app-color }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node
@@ -18,7 +33,11 @@ jobs:
           cache: 'npm'
       - name: Install dependencies
         run: npm ci
+        
+      # Quality Gate 1: Escaneo de vulnerabilidades conocidas
       - name: Security Audit
         run: npm audit --audit-level=moderate
+        
+      # Quality Gate 2: Validación funcional del código fuente
       - name: Run Tests
         run: npm test
