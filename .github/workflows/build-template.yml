@@ -1,10 +1,12 @@
 # ==============================================================================
 # PLANTILLA: Construcción (CI Build)
-# VERSIÓN: 2.0.1
+# VERSIÓN: 2.1.1 (MINOR: Se agrega output de timestamp de compilación)
 # DESCRIPCIÓN: Módulo reutilizable encargado de preparar el entorno Node.js,
 #              optimizar tiempos mediante caché y descargar dependencias base.
 # PARÁMETROS: 
 #   - node-version (string): Versión de Node.js a utilizar.
+# OUTPUTS:
+#   - build_time: Retorna la marca de tiempo exacta de la construcción.
 # ==============================================================================
 name: CI Build Template
 on:
@@ -13,9 +15,15 @@ on:
       node-version:
         required: true
         type: string
+    outputs:
+      build_time:
+        description: "Fecha y hora en que finalizó el build"
+        value: ${{ jobs.build.outputs.timestamp }}
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      timestamp: ${{ steps.time.outputs.time }}
     steps:
       # actions/checkout@v4: Extrae el código del repositorio
       - uses: actions/checkout@v4
@@ -30,3 +38,8 @@ jobs:
       # Instalación limpia basada en package-lock.json
       - name: Install dependencies (Build)
         run: npm ci
+
+      # Generación del output parametrizado
+      - name: Record Build Time
+        id: time
+        run: echo "time=$(date -u)" >> $GITHUB_OUTPUT

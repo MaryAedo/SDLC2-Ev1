@@ -1,10 +1,11 @@
 # ==============================================================================
 # PLANTILLA: Pruebas y Compliance (CI Test)
-# VERSIÓN: 1.0.1
+# VERSIÓN: 1.1.1 (MINOR: Parametrización de variable de entorno APP_COLOR)
 # DESCRIPCIÓN: Módulo de Quality Gate. Ejecuta auditorías de seguridad y 
 #              pruebas unitarias para mitigar riesgos antes del despliegue.
 # PARÁMETROS: 
 #   - node-version (string): Versión de Node.js a utilizar.
+#   - app-color (string): Variable inyectada para las pruebas unitarias.
 # ==============================================================================
 name: CI Test Template
 on:
@@ -13,9 +14,16 @@ on:
       node-version:
         required: true
         type: string
+      app-color:
+        required: false
+        type: string
+        default: 'Test-Env'
 jobs:
   test:
     runs-on: ubuntu-latest
+    # Declaración de variables de entorno comunes parametrizables
+    env:
+      APP_COLOR: ${{ inputs.app-color }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node

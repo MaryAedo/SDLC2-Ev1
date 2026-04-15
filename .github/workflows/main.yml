@@ -1,6 +1,6 @@
 # ==============================================================================
 # MÓDULO: Orquestador Principal (TechMarket)
-# VERSIÓN: 1.0.1
+# VERSIÓN: 1.1.1 (MINOR: Se adaptan llamadas para inyectar parámetro app-color)
 # DESCRIPCIÓN: Pipeline central que define la estrategia multi-entorno.
 #              Coordina la ejecución secuencial de las plantillas de 
 #              Construcción, Pruebas y Despliegue.
@@ -20,9 +20,12 @@ jobs:
     uses: ./.github/workflows/test-template.yml
     with:
       node-version: '20'
+      app-color: 'Pipeline-Validacion' # Inyecta parámetro al entorno de pruebas
 
   call-deploy:
     needs: call-test # Garantiza que las pruebas pasen con éxito antes de desplegar
     if: github.ref == 'refs/heads/main' # Condicional: Solo despliega en producción
     uses: ./.github/workflows/deploy-template.yml
+    with:
+      app-color: 'Produccion-TechMarket' # Inyecta parámetro al build de Docker
     secrets: inherit # Propagación segura de secretos AWS

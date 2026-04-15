@@ -1,0 +1,18 @@
+{
+    "name": "techmarket-api",
+    "version": "1.1.0",
+    "description": "API de TechMarket para despliegue CI/CD. Integra variables de entorno (APP_COLOR) para validación de despliegues.",
+    "main": "index.js",
+    "scripts": {
+    "start": "node index.js",
+    "test": "jest"
+    },
+    "dependencies": {
+    "express": "^4.18.2"
+    },
+    "devDependencies": {
+    "jest": "^29.5.0"
+    },
+    "author": "TechMarket DevOps Team",
+    "license": "ISC"
+}

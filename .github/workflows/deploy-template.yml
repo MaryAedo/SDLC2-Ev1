@@ -1,6 +1,6 @@
 # ==============================================================================
 # PLANTILLA: Despliegue AWS ECR (CD Deploy)
-# VERSIÓN: 1.0.1
+# VERSIÓN: 1.1.1 (MINOR: Se integran env vars y build-args para Docker)
 # DESCRIPCIÓN: Módulo de contenerización y registro seguro. Autentica con AWS
 #              y almacena la imagen inmutable etiquetada con el SHA del commit.
 # SECRETOS REQUERIDOS: 
@@ -9,10 +9,22 @@
 name: CD Deploy Template
 on:
   workflow_call:
+    inputs:
+      app-color:
+        required: false
+        type: string
+        default: 'Blue'
     secrets:
       AWS_ACCESS_KEY_ID: {required: true}
       AWS_SECRET_ACCESS_KEY: {required: true}
       AWS_SESSION_TOKEN: {required: true} # Obligatorio para AWS Academy
+
+# Declaración de variables de entorno (env:) comunes
+env:
+  ECR_REPOSITORY: techmarket-repo
+  IMAGE_TAG: ${{ github.sha }}
+  APP_COLOR: ${{ inputs.app-color }}
+
 jobs:
   build-docker-and-push:
     runs-on: ubuntu-latest
@@ -33,9 +45,9 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
         
-      # Trazabilidad perfecta: El tag de la imagen usa el SHA del commit (github.sha)
+      # Trazabilidad perfecta: El tag usa el SHA del commit y se inyecta el ARG de Docker
       - name: Build and Push Image
         run: |
-          docker build -t techmarket-app:${{ github.sha }} .
-          docker tag techmarket-app:${{ github.sha }} ${{ steps.login-ecr.outputs.registry }}/techmarket-repo:${{ github.sha }}
-          docker push ${{ steps.login-ecr.outputs.registry }}/techmarket-repo:${{ github.sha }}
+          docker build --build-arg BUILD_COLOR=${{ env.APP_COLOR }} -t techmarket-app:${{ env.IMAGE_TAG }} .
+          docker tag techmarket-app:${{ env.IMAGE_TAG }} ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+          docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
