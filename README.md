@@ -31,6 +31,7 @@ jobs:
       # Se modifican los parámetros según la necesidad del equipo
       node-version: '18' # Cambiamos de 20 a 18
       app-color: 'Frontend-Staging' # Inyectamos nueva variable de entorno
+```
 
 ## 5. Justificación de Acciones Externas (Marketplace)
 Para optimizar el proceso, el pipeline delega procesos complejos en componentes de software de terceros. La elección de cada acción externa se justifica bajo criterios estrictos de propósito e impacto en el pipeline:
