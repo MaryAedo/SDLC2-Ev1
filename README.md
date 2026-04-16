@@ -1,4 +1,8 @@
 # SDLC2-Ev1
+Integrantes:
+* Marysabel Aedo
+* Solange Milla
+* Nathaly Saavedra
 
 # 🚀 TechMarket: Estandarización de CI/CD con Plantillas Reutilizables
 
